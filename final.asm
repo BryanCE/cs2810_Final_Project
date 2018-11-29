@@ -84,5 +84,3 @@ instruction1 .stringz "\nChoose your opponent\nPress Z for a Zombie or N for a N
 
 trap x25 ; final shut down of program
 .end ; end
-
-;git test
