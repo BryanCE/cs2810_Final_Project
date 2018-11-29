@@ -51,7 +51,7 @@ Inthefight
 	add r4, r3, r1  ;checking for a punch
 	BRz punchLoop	;if a punch was used branch to punchLoop
 	
-;gettinghit
+gettinghit
 
 punchLoop
 	add r6, r6, #-10
@@ -62,11 +62,11 @@ kickLoop
 
 EXIT 
 	and r0, r0, #0
-	;lea r0, quitgame------------something wrong here
+	lea r0, quitgame;------------something wrong here
 	puts
 	trap x25
 	
-welcome .stringz "Welcome to the world of Zoltan!\nYou've Lived your whole life wanting to know your future.\nThere is only one way to find out!\nYou must test yourself in a mortal FIGHT!"				
+welcome .stringz "Welcome to Zoltan!\nYour whole life you've wanting to know your future.\nThere is only one way!\nYou must fight!"				
 enemyPicked .fill x0000
 yourhitpoints .fill #100  ;or could be x0064 in hex
 enemyhitpoints .fill #100 ;or could be x0064 in hex
@@ -74,10 +74,10 @@ kick .fill #-15
 punch .fill #-10
 kicking .fill x006b
 punching .fill x0070
-;quitgame .stringz "You must be Scared!"-------------something wrong here
+quitgame .stringz "You must be Scared!";-------------something wrong here
 kickorpunch .stringz "\nk = kick p = punch\n"
 readytofight .stringz "Get ready to fight!\n"
-instruction1 .stringz "\nLuckily you do get to choose your opponent\nPress Z to fight a Zombie or press N to fight a Ninja\nOr press e to exit if you don't dare to FIGHT!\nWhich do you choose?\n"
+instruction1 .stringz "\nChoose your opponent\nPress Z for a Zombie or N for a Ninja\nOr e to exit\nWhich do you choose?\n"
 
 
 
