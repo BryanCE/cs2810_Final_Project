@@ -51,7 +51,7 @@ Inthefight
 	add r4, r3, r1  ;checking for a punch
 	BRz punchLoop	;if a punch was used branch to punchLoop
 	
-gettinghit
+;gettinghit
 
 punchLoop
 	add r6, r6, #-10
