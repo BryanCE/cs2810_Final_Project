@@ -12,9 +12,10 @@ st r0, enemyPicked   	; storing the result of the input in enemyPicked label
 						; from r0 
 
 ld r1, enemyPicked
+ld r2, ascii_e 			;loading the value of e to compare against enemyPicked
 not r1, r1
 add r1, r1 #1
-add r1, r1, r0
+add r1, r1, r2
 BRz EXIT ; branching to exit if e was pressed
 				
 lea r0, readytofight	; get ready to fight 
