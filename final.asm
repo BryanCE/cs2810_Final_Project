@@ -74,13 +74,10 @@ kick .fill #-15
 punch .fill #-10
 kicking .fill x006b
 punching .fill x0070
+ascii_e .FILL x0065
 quitgame .stringz "You must be Scared!";-------------something wrong here
 kickorpunch .stringz "\nk = kick p = punch\n"
 readytofight .stringz "Get ready to fight!\n"
 instruction1 .stringz "\nChoose your opponent\nPress Z for a Zombie or N for a Ninja\nOr e to exit\nWhich do you choose?\n"
 
-
-
-
-trap x25 ; final shut down of program
 .end ; end
