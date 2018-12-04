@@ -27,6 +27,8 @@ START
         ADD R1, R1, R4
         BRz EXIT
 
+        AND     R4, R4, #0
+	AND 	R1, R1, #0
         LD R1, TEMP
         LD R4, ASCII_S
         NOT R1, R1
@@ -34,8 +36,6 @@ START
         ADD R1, R1, R4
         BRz RANDOMOUT
         BRnp START
-
-
 
 RANDOMOUT   
         AND R4, R4, #0
@@ -47,30 +47,26 @@ RANDOMZERO
         AND R4, R4, #0
         BR RANDOMIN
 
-RANDOMIN 
-        AND R1, R1, #0
-        AND R3, R1, #0
+RANDOMIN
         ADD R4, R4, #1
-        LD R1, KBSRVAL
-        LDI R3, KBSRSTORE
-        AND R3, R3, R1
-        ADD	R3,	R3,	#-1
-        NOT	R3,	R3
-        ADD R3, R3, R1
-        BRnp RESULT
         ADD R5, R4, #0
-        ADD R5, R5, #-4
-        BRp RANDOMZERO
-            
-            
+        ADD R5, R5, #-6
+        BRz RANDOMZERO
+        LDI R3, KBSRSTORE
+        BRzp RANDOMIN
+        BRn RESULT
+               
 
-RESULT  AND R0, R0, #0
+RESULT
+        AND R0, R0, #0
         LD R6, ASCII
         ADD R0, R4, R6
-        PUTS
+        OUT
         LEA R0, NEWLINE
         PUTS
-        BR START
+        AND R3, R3, #0
+        STI R3, KBSRSTORE
+        BR RANDOMOUT
 
 
 
@@ -81,20 +77,13 @@ EXIT    LEA R0, QUIT
         HALT
 
 WELCOME .STRINGZ "Press s to start RNG or e to exit\n"
-USERINPUT .STRINGZ	"Press r for random number\n"
+USERINPUT .STRINGZ	"Press any key for random number\n"
 QUIT .STRINGZ	"Goodbye"
-ZERO .STRINGZ	"0\n" 
-ONE .STRINGZ	"1\n" 
-TWO .STRINGZ	"2\n" 
-THREE .STRINGZ	"3\n" 
-FOUR .STRINGZ	"4\n" 
-FIVE .STRINGZ	"5\n" 
-TEMP .FILL	x0000
-ASCII .FILL x0030
+TEMP .FILL x0000
+ASCII .FILL #48
 ASCII_E .FILL x0065
 ASCII_R .FILL x0072
 ASCII_S .FILL x0073
-KBSRVAL .FILL x8000
 KBSRSTORE .FILL xFE00
 NEWLINE .STRINGZ "\n"
 
