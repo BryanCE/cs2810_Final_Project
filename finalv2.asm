@@ -100,41 +100,47 @@ Inthefight
 	BRz youPunch
 
 	add r5, r5, #0
-	BRp gettinghit
-	
-gettinghit
+	BRp enemyTurn
 
 youPunch
 	add r6, r6, #-10
 	BRnzp enemyTurn
 youKick
 	add r6, r6, #-15
-	;BRnzp enemyTurn
+	BRnzp enemyTurn
 	
 enemyTurn
+	
+randomstart
+    and r4, r4, #0 ;clears reg 4
 	lea r0, enterPicksHit ;using timing of enter key to randomly pick which hit gets executed on you
 	puts
-	
-hitLoop;---------------------------need to work on random nuber
-		; generator to get this working right to pick the value deducted from your 
-		;hit points
-	;------------------------------needs work-------------------------------
-	hitMax
-		ld r4, pressedEnter
-		and r1, r1, #0 ;clear r1
-		add r1, r1, #15 ; using 25 as max hit value used
-		loop1
-			add r1, r1, #-1 ;decremet by 1 every loop------------
-			getc
-			add r2, r0,#0 ; move character to r2
-			not r2,r2
-			add r2,r2,#1
-			add r3,r2,r4
-			BRz Inthefight
+    BR randomnum
+
+randomzero
+	and r4, r4, #0
+	BR randomnum
+
+randomnum
+    add r4, r4, #1 ;increments R4 by one and continues to loop
+    add r2, r4, #0 
+    add r2, r2, #-11 ;random number range 1-10
+    BRz randomzero ;if it reaches upper limit branch to zero
+    ldi r3, kbsrstore ;check for keyboard press
+    BRzp randomnum ;loop back if no press
+	st r4, temprand ;storage of "random" number generated
+    BRn gettinghit
+
+gettinghit
+	getc ;to clear the buffer
+
+	loop1
+		add r5, r5, #-1; decrement user hit points
+		add r4, r4, #-1 ;decrement by 1 every loop
+		BRnz Inthefight
+		BRp loop1
 			
-			BRp loop1
-			BRn hitMax
-	;------------------------needs work above-----------------------------------------	
+	;------------------------needs work above-----------------------------------------
 
 fortune
 	
@@ -148,12 +154,6 @@ EXIT
 	lea r0, quitgame
 	puts
 	trap x25
-	
-
-fightingN .stringz "\nYou chose to fight a NINJA good luck!\n" 
-fightingZ .stringz "\nYou chose to fight a Zombie good luck!\n"
-loser .stringz "\nSorry but you did not earn your fortune! \nPress p to play again or e to exit.\n"
-enterPicksHit .stringz "\nPress enter for next move\n"
 
 pressedEnter .fill x0A
 yourhitpoints .fill #100  ;or could be x0064 in hex
@@ -163,8 +163,15 @@ punched .fill #-10
 kicking .fill x006b
 punching .fill x0070
 playAgain .fill x70 ;p= 112 or x70
+kbsrstore .fill xFE00
+temprand .fill x0000
+kbdrval .fill xFE02 
 quitgame .stringz "You must be Scared!"
 kickorpunch .stringz "\nk = kick p = punch\n"
+fightingN .stringz "\nYou chose to fight a NINJA good luck!\n" 
+fightingZ .stringz "\nYou chose to fight a Zombie good luck!\n"
+loser .stringz "\nSorry but you did not earn your fortune! \nPress p to play again or e to exit.\n"
+enterPicksHit .stringz "\nPress enter to defend\n"
 
 trap x25 ; final shut down of program
 .end ; end
