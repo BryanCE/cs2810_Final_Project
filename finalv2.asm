@@ -54,8 +54,10 @@ youLost
 	add r1,r1,#1
 	add r4,r1,r2 ;checking to see if player wants to play again saving result in r4
 	BRz play
-	add r4, r1, r3 ; checing for exit character
+	add r4, r1, r3 ; checking for exit character
 	BRz EXIT
+
+loser .stringz "\nSorry but you did not earn your fortune! \nPress p to play again or e to exit.\n"
 ;----------------------------------------------------------------------------------
 ;------------------------------------begin fight loop------------------------------
 ;k = x006b or 107 
@@ -132,31 +134,63 @@ randomnum
     BRn gettinghit
 
 gettinghit
-	getc ;to clear the buffer
 
-	loop1
-		add r5, r5, #-1; decrement user hit points
-		add r4, r4, #-1 ;decrement by 1 every loop
-		BRnz Inthefight
-		BRp loop1
+getc ;to clear the buffer
+
+loop1
+	add r5, r5, #-1; decrement user hit points
+	add r4, r4, #-1 ;decrement by 1 every loop
+	BRnz Inthefight
+	BRp loop1
 			
-	;------------------------needs work above-----------------------------------------
 
 fortune
-	
 
+fortrandstart
+    and r4, r4, #0 ;clears reg 4
+	lea r0, enterPicksHit ;using timing of enter key to randomly pick which hit gets executed on you
+	puts
+    BR fortrandnum
 
+fortrandzero
+	and r4, r4, #0
+	BR fortrandnum
+
+fortrandnum
+    add r4, r4, #1 ;increments R4 by one and continues to loop
+    add r2, r4, #0 
+    add r2, r2, #-4 ;random number range 1-3
+    BRz randomzero ;if it reaches upper limit branch to zero
+    ldi r3, kbsrstore ;check for keyboard press
+    BRzp fortrandnum ;loop back if no press
+	st r4, temprand ;storage of "random" number generated
+    BRn fortuneresult
+
+fortuneresult
 	
 	
 	
 EXIT 
-	and r0, r0, #0
+	and r0, r0, #0 ;clearing registers
+	and r1, r1, #0
+	ld r1, yourhitpoints ;test for damage to user to see if they played
+	not r1, r1
+	add r1, r1, #1
+	add r1, r1, r5
+	BRz noplay
+	BRnp yesplay
+
+noplay	
 	lea r0, quitgame
 	puts
-	trap x25
+	trap x25; or halt
+yesplay
+	lea r0, quitgame0
+	puts
+	trap x25; or halt
 
 pressedEnter .fill x0A
-yourhitpoints .fill #100  ;or could be x0064 in hex
+yourhitpoints .fill #50  ;or could be x0032 in hex
 enemyhitpoints .fill #100 ;or could be x0064 in hex
 kicked .fill #-15
 punched .fill #-10
@@ -165,13 +199,20 @@ punching .fill x0070
 playAgain .fill x70 ;p= 112 or x70
 kbsrstore .fill xFE00
 temprand .fill x0000
-kbdrval .fill xFE02 
-quitgame .stringz "You must be Scared!"
+kbdrval .fill xFE02
+enterPicksHit .stringz "\nPress enter to defend\n" 
+quitgame .stringz "No fortune for cowards!"
+quitgame0 .stringz "Thanks for playing!"
 kickorpunch .stringz "\nk = kick p = punch\n"
 fightingN .stringz "\nYou chose to fight a NINJA good luck!\n" 
 fightingZ .stringz "\nYou chose to fight a Zombie good luck!\n"
-loser .stringz "\nSorry but you did not earn your fortune! \nPress p to play again or e to exit.\n"
-enterPicksHit .stringz "\nPress enter to defend\n"
+goodfortune1 .stringz "\nA golden egg of opportunity falls into your lap this month.\n"
+goodfortune2 .stringz "\nA new perspective will come with the new year.\n"
+goodfortune3 .stringz "\nNow is a good time to buy stock.\n"
+badfortune1 .stringz "\nYou smell like beef.\n"
+badfortune2 .stringz "\nMoist pickles of bulbous girth away you next week\n"
+badfortune3 .stringz "\nYour life will end miserably, though nobody will notice.\n"
+
 
 trap x25 ; final shut down of program
 .end ; end
