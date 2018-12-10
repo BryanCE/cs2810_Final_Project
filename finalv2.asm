@@ -57,7 +57,20 @@ youLost
 	add r4, r1, r3 ; checking for exit character
 	BRz EXIT
 
-loser .stringz "\nSorry but you did not earn your fortune! \nPress p to play again or e to exit.\n"
+playAgain .fill x70 ;p= 112 or x70
+yourhitpoints .fill #50  ;or could be x0032 in hex
+enemyhitpoints .fill #100 ;or could be x0064 in hex
+kicked .fill #-15
+punched .fill #-10
+kicking .fill x006b
+punching .fill x0070
+kbsrstore .fill xFE00
+temprand .fill x0000
+pressedEnter .fill x0A
+kickorpunch .stringz "\nk = kick p = punch\n"
+fightingN .stringz "\nYou chose to fight a Ninja good luck!\n" 
+fightingZ .stringz "\nYou chose to fight a Zombie good luck!\n"
+loser .stringz "\nPress p to play again or e to exit.\n"
 ;----------------------------------------------------------------------------------
 ;------------------------------------begin fight loop------------------------------
 ;k = x006b or 107 
@@ -84,9 +97,9 @@ fightingZombie
 Inthefight	
 
 	add r5, r5, #0 ; if your hit points are negative branch to you lost
-	BRn youLost
+	BRn fortrandstart
 	add r6, r6, #0 ; if the enemies points are negative branch to fortune
-	BRn fortune
+	BRn fortrandstart
 	
 	lea r0, kickorpunch ;choose a kick or punch you make a hit first
 	puts
@@ -128,9 +141,9 @@ randomnum
     add r2, r4, #0 
     add r2, r2, #-11 ;random number range 1-10
     BRz randomzero ;if it reaches upper limit branch to zero
+	st r4, temprand ;storage of "random" number generated
     ldi r3, kbsrstore ;check for keyboard press
     BRzp randomnum ;loop back if no press
-	st r4, temprand ;storage of "random" number generated
     BRn gettinghit
 
 gettinghit
@@ -143,33 +156,6 @@ loop1
 	BRnz Inthefight
 	BRp loop1
 			
-
-fortune
-
-fortrandstart
-    and r4, r4, #0 ;clears reg 4
-	lea r0, enterPicksHit ;using timing of enter key to randomly pick which hit gets executed on you
-	puts
-    BR fortrandnum
-
-fortrandzero
-	and r4, r4, #0
-	BR fortrandnum
-
-fortrandnum
-    add r4, r4, #1 ;increments R4 by one and continues to loop
-    add r2, r4, #0 
-    add r2, r2, #-4 ;random number range 1-3
-    BRz randomzero ;if it reaches upper limit branch to zero
-    ldi r3, kbsrstore ;check for keyboard press
-    BRzp fortrandnum ;loop back if no press
-	st r4, temprand ;storage of "random" number generated
-    BRn fortuneresult
-
-fortuneresult
-	
-	
-	
 EXIT 
 	and r0, r0, #0 ;clearing registers
 	and r1, r1, #0
@@ -189,30 +175,94 @@ yesplay
 	puts
 	trap x25; or halt
 
-pressedEnter .fill x0A
-yourhitpoints .fill #50  ;or could be x0032 in hex
-enemyhitpoints .fill #100 ;or could be x0064 in hex
-kicked .fill #-15
-punched .fill #-10
-kicking .fill x006b
-punching .fill x0070
-playAgain .fill x70 ;p= 112 or x70
-kbsrstore .fill xFE00
-temprand .fill x0000
-kbdrval .fill xFE02
 enterPicksHit .stringz "\nPress enter to defend\n" 
-quitgame .stringz "No fortune for cowards!"
-quitgame0 .stringz "Thanks for playing!"
-kickorpunch .stringz "\nk = kick p = punch\n"
-fightingN .stringz "\nYou chose to fight a NINJA good luck!\n" 
-fightingZ .stringz "\nYou chose to fight a Zombie good luck!\n"
+quitgame .stringz "\nNo fortune for cowards!\n"
+quitgame0 .stringz "\nThanks for playing!\n"
+
+
+fortrandstart
+	and r4, r4, #0 ;clears reg 4
+	lea r0, enterforfortune ;using timing of enter key to randomly pick which hit gets executed on you
+	puts
+    BR fortrandnum
+
+fortrandzero
+	and r4, r4, #0
+	BR fortrandnum
+
+fortrandnum
+    add r4, r4, #1 ;increments R4 by one and continues to loop
+    add r2, r4, #0 
+    add r2, r2, #-4 ;random number range 1-3
+    BRz fortrandzero ;if it reaches upper limit branch to zero
+	st r4, temprand2 ;storage of "random" number generated
+    ldi r3, kbsrstore2 ;check for keyboard press
+	BRzp fortrandnum ;loop back if no press
+	BRn fortuneresult
+    
+
+fortuneresult
+	getc ;to clear the buffer
+	and r1, r1, #0; clear r1
+	add r2, r5, #0
+	add r1, r1, r2; add user hit points to check if negative
+	BRn badfortune
+	BRzp goodfortune
+
+goodfortune
+	ld r2, temprand2
+	add r3, r2, #-2
+	BRn printgood1
+	BRz printgood2
+	BRp printgood3
+
+badfortune
+	ld r2, temprand2
+	add r3, r2, #-2
+	BRn printbad1
+	BRz printbad2
+	BRp printbad3
+
+printgood1
+	lea r0, goodfortune1
+	puts
+	jsr yesplay
+
+printgood2
+	lea r0, goodfortune2
+	puts
+	jsr yesplay
+
+printgood3
+	lea r0, goodfortune3
+	puts
+	jsr yesplay
+
 goodfortune1 .stringz "\nA golden egg of opportunity falls into your lap this month.\n"
 goodfortune2 .stringz "\nA new perspective will come with the new year.\n"
 goodfortune3 .stringz "\nNow is a good time to buy stock.\n"
-badfortune1 .stringz "\nYou smell like beef.\n"
-badfortune2 .stringz "\nMoist pickles of bulbous girth away you next week\n"
-badfortune3 .stringz "\nYour life will end miserably, though nobody will notice.\n"
 
+printbad1
+	lea r0, badfortune1
+	puts
+	jsr yesplay
+
+printbad2
+	lea r0, badfortune2
+	puts
+	jsr yesplay
+
+printbad3
+	lea r0, badfortune3
+	puts
+	jsr yesplay
+
+kbsrstore2 .fill xFE00
+temprand2 .fill x0000
+enterforfortune .stringz "\nPress f for your fortune.\n"
+badfortune1 .stringz "\nYou smell like beef.\n"
+badfortune2 .stringz "\nMoist pickles of bulbous girth await you next week.\n"
+badfortune3 .stringz "\nYour life will end miserably, though nobody will notice.\n"
 
 trap x25 ; final shut down of program
 .end ; end
